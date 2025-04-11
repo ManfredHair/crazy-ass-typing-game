@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crazy Ass Typing Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 800px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      letter-spacing: 2px;
+      position: relative;
+    }
+
+    .glitch-title {
+      animation: glitch 1s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+      25% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+      50% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+      75% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+      100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+    }
+
+    @keyframes vibrate {
+      0% { transform: translate(0); }
+      25% { transform: translate(2px, 2px); }
+      50% { transform: translate(-2px, -2px); }
+      75% { transform: translate(-2px, 2px); }
+      100% { transform: translate(2px, -2px); }
+    }
+
+    .welcome-screen {
+      background-color: rgba(30, 30, 30, 0.8);
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px solid #8b5cf6;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+    }
+
+    .welcome-screen h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #8b5cf6;
+    }
+
+    .welcome-screen p {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .level-preview {
+      display: flex;
+      justify-content: space-around;
+      margin: 30px 0;
+    }
+
+    .level-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      min-width: 120px;
+    }
+
+    .level-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #8b5cf6;
+      margin-bottom: 5px;
+    }
+
+    .level-desc {
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+
+    .start-button {
+      background-color: #8b5cf6;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 20px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.7);
+    }
+
+    .start-button:hover {
+      background-color: #7c3aed;
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.9);
+    }
+
+    .sentence-display {
+      font-size: 2rem;
+      font-family: monospace;
+      min-height: 80px;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .letter {
+      display: inline-block;
+      margin: 0 2px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .letter.correct {
+      color: #4ade80;
+    }
+
+    .letter.wrong {
+      color: #ef4444;
+    }
+
+    input {
+      width: 100%;
+      max-width: 500px;
+      padding: 12px;
+      font-size: 1.5rem;
+      background-color: #222;
+      border: 2px solid #8b5cf6;
+      border-radius: 6px;
+      color: white;
+      margin-bottom: 1.5rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.5);
+    }
+
+    button {
+      background-color: #8b5cf6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin: 10px;
+    }
+
+    button:hover {
+      background-color: #7c3aed;
+    }
+
+    .increase-chaos {
+      background-color: #dc2626;
+    }
+
+    .increase-chaos:hover {
+      background-color: #b91c1c;
+    }
+
+    .message {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      color: #4ade80;
+    }
+
+    .chaos-level {
+      margin-top: 1rem;
+      color: #ef4444;
+      font-weight: bold;
+    }
+
+    .instructions {
+      opacity: 0.7;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+    }
+
+    /* Canvas for confetti */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="glitch-title">CRAZY ASS TYPING GAME</h1>
+    
+    <div id="welcome-screen" class="welcome-screen">
+      <h2>Welcome to the Most Chaotic Typing Game Ever!</h2>
+      <p>Test your typing skills against increasingly insane challenges.</p>
+      <p>Each level adds more chaos to the text you need to type.</p>
+      <div class="level-preview">
+        <div class="level-item">
+          <span class="level-number">1</span>
+          <span class="level-desc">Basic Chaos</span>
+        </div>
+        <div class="level-item">
+          <span class="level-number">5</span>
+          <span class="level-desc">Color Inversion</span>
+        </div>
+        <div class="level-item">
+          <span class="level-number">10</span>
+          <span class="level-desc">Ultimate Chaos</span>
+        </div>
+      </div>
+      <button id="start-button" class="start-button">START THE MADNESS</button>
+    </div>
+    
+    <div class="sentence-display" id="sentence-display"></div>
+    
+    <input 
+      type="text" 
+      id="typing-input" 
+      placeholder="Start typing here..." 
+      autocomplete="off" 
+      autocorrect="off" 
+      autocapitalize="off"
+      spellcheck="false"
+    >
+    
+    <div id="controls">
+      <button id="start-button-old" style="display: none;">Start Challenge</button>
+    </div>
+    
+    <div id="message" class="message"></div>
+    
+    <div id="chaos-level" class="chaos-level"></div>
+    
+    <div id="instructions" class="instructions">
+      Type the sentence exactly as shown to win!
+    </div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <script>
+    // Game variables
+    let gameState = 'welcome'; // welcome, playing, finished
+    let sentence = '';
+    let input = '';
+    let startTime = null;
+    let endTime = null;
+    let chaosLevel = 1;
+    let chaosInterval = null;
+    let letters = [];
+    let usedSentences = new Set(); // Track used sentences in current session
+
+    // DOM elements
+    const sentenceDisplay = document.getElementById('sentence-display');
+    const typingInput = document.getElementById('typing-input');
+    const startButton = document.getElementById('start-button');
+    const controls = document.getElementById('controls');
+    const messageElement = document.getElementById('message');
+    const chaosLevelElement = document.getElementById('chaos-level');
+    const instructionsElement = document.getElementById('instructions');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+
+    // Set up confetti canvas
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+    const confettiContext = confettiCanvas.getContext('2d');
+    
+    // Sentences pool
+    const sentences = [
+      // Complex vocabulary in shorter phrases
+      "The quantum paradox bewilders astute minds",
+      "Entanglement defies classical physics",
+      "Consciousness remains an enigma",
+      "Serendipity leads to discoveries",
+      "Subatomic particles dance mysteriously",
+      
+      // Technical phrases
+      "Neural networks process data swiftly",
+      "Electromagnetic waves traverse space",
+      "Quantum forces bind atoms together",
+      "The universe must support observers",
+      "Entropy increases in closed systems",
+      
+      // Philosophical concepts
+      "Existence defies simple explanation",
+      "Knowledge remains fundamentally uncertain",
+      "Ethics guide human behavior",
+      "Freedom defines human existence",
+      "Truth emerges from dialogue",
+      
+      // Complex words
+      "Supercalifragilisticexpialidocious",
+      "Antidisestablishmentarianism",
+      "Pneumonoultramicroscopicsilicovolcanoconiosis",
+      "Floccinaucinihilipilification",
+      "Honorificabilitudinitatibus",
+      
+      // Tongue twisters
+      "She sells seashells by the seashore",
+      "Peter Piper picked pickled peppers",
+      "Woodchuck chucking wood chunks",
+      "Unique New York unique New York",
+      "Red rabbits run round rocks",
+      
+      // Cryptic phrases
+      "Cryptic messages baffle cryptographers",
+      "Quantum tunneling breaks barriers",
+      "Ancient symbols defy interpretation",
+      "Paradoxical phenomena perplex minds",
+      "Labyrinthine puzzles challenge logic",
+      
+      // Technical terms
+      "Microprocessors execute instructions",
+      "Quantum particles correlate instantly",
+      "Cryptography secures information",
+      "Neural plasticity enables learning",
+      "Quantum computers utilize superposition",
+      
+      // Abstract concepts
+      "Abstract entities challenge philosophy",
+      "Relativism questions absolute truth",
+      "Quantum mechanics defies intuition",
+      "Consequentialism guides ethics",
+      "Phenomenology examines consciousness",
+      
+      // Scientific terms
+      "Mitochondria power cells",
+      "Gluons bind atomic nuclei",
+      "Observers shape reality",
+      "Entropy drives change",
+      "Electromagnetic waves carry energy",
+      
+      // Challenging combinations
+      "Supercalifragilisticexpialidocious word",
+      "Antidisestablishmentarian views",
+      "Pneumonoultramicroscopic disease",
+      "Floccinaucinihilipilificator",
+      "Honorificabilitudinous state"
+    ];
+
+    // Initialize the game
+    function init() {
+      startButton.addEventListener('click', startGame);
+      typingInput.addEventListener('input', handleInput);
+      
+      // Initially hide some elements
+      messageElement.style.display = 'none';
+      chaosLevelElement.style.display = 'none';
+      instructionsElement.style.display = 'none';
+      sentenceDisplay.style.display = 'none';
+      typingInput.style.display = 'none';
+
+      // Show welcome screen
+      document.getElementById('welcome-screen').style.display = 'block';
+    }
+
+    // Set a new sentence
+    function setSentence(newSentence) {
+      sentence = newSentence;
+      letters = sentence.split('').map((char, index) => ({
+        char,
+        id: index,
+        transform: '',
+        animation: '',
+        opacity: 1,
+        status: 'pending' // pending, correct, wrong
+      }));
+    }
+
+    // Render the sentence with each letter as a span
+    function renderSentence() {
+      sentenceDisplay.innerHTML = '';
+      letters.forEach((letter) => {
+        const span = document.createElement('span');
+        span.className = `letter ${letter.status}`;
+        span.textContent = letter.char === ' ' ? '\u00A0' : letter.char;
+        span.id = `letter-${letter.id}`;
+        
+        if (gameState === 'playing') {
+          span.style.transform = letter.transform;
+          span.style.opacity = letter.opacity;
+          if (letter.animation) {
+            span.style.animation = letter.animation;
+          }
+        }
+        
+        sentenceDisplay.appendChild(span);
+      });
+    }
+
+    // Start the game
+    function startGame() {
+      gameState = 'playing';
+      startTime = Date.now();
+      typingInput.value = '';
+      input = '';
+      
+      // Hide welcome screen
+      document.getElementById('welcome-screen').style.display = 'none';
+      
+      // Show game elements
+      sentenceDisplay.style.display = 'flex';
+      typingInput.style.display = 'block';
+      typingInput.style.margin = '0 auto 1.5rem auto';
+      
+      // Get a new unused sentence
+      let availableSentences = sentences.filter(s => !usedSentences.has(s));
+      
+      // If all sentences have been used, reset the used sentences set
+      if (availableSentences.length === 0) {
+        usedSentences.clear();
+        availableSentences = sentences;
+      }
+      
+      // Randomly select a sentence from available ones
+      const sentenceIndex = Math.floor(Math.random() * availableSentences.length);
+      const selectedSentence = availableSentences[sentenceIndex];
+      
+      // Mark the sentence as used
+      usedSentences.add(selectedSentence);
+      
+      // Set the sentence and render
+      setSentence(selectedSentence);
+      renderSentence();
+      
+      // Update UI
+      controls.innerHTML = '';
+      messageElement.style.display = 'none';
+      instructionsElement.style.display = 'block';
+      
+      if (chaosLevel > 1) {
+        chaosLevelElement.style.display = 'block';
+        chaosLevelElement.textContent = `Chaos Level: ${chaosLevel} / 10`;
+      } else {
+        chaosLevelElement.style.display = 'none';
+      }
+      
+      // Focus the input
+      typingInput.disabled = false;
+      typingInput.focus();
+      
+      // Start chaos!
+      startChaos();
+    }
+
+    // Handle input changes
+    function handleInput(e) {
+      input = e.target.value;
+      
+      // Auto-start game on first keystroke
+      if (gameState === 'welcome' && input.length === 1) {
+        startGame();
+        return;
+      }
+      
+      // Update letter status (correct/wrong)
+      for (let i = 0; i < letters.length; i++) {
+        if (i < input.length) {
+          letters[i].status = input[i] === letters[i].char ? 'correct' : 'wrong';
+        } else {
+          letters[i].status = 'pending';
+        }
+      }
+      renderSentence();
+      
+      // Check for victory
+      if (input === sentence && gameState === 'playing') {
+        endTime = Date.now();
+        gameState = 'finished';
+        finishGame();
+      }
+    }
+
+    // Start applying chaos effects
+    function startChaos() {
+      // Clear any existing interval
+      if (chaosInterval) {
+        clearInterval(chaosInterval);
+      }
+      
+      // Apply chaos at intervals based on chaos level
+      chaosInterval = setInterval(() => {
+        applyChaos();
+        renderSentence();
+      }, Math.max(800 - (chaosLevel * 100), 200));
+    }
+
+    // Apply chaos effects to letters
+    function applyChaos() {
+      // Apply random effects to random letters
+      for (let i = 0; i < Math.min(3 + chaosLevel, sentence.length); i++) {
+        const randomIndex = Math.floor(Math.random() * letters.length);
+        const effect = Math.floor(Math.random() * (5 + chaosLevel > 5 ? 8 : 5));
+        
+        switch(effect) {
+          case 0: // Shift position
+            letters[randomIndex].transform = `translate(${(Math.random() * 20 * chaosLevel/2) - 10 * chaosLevel/2}px, ${(Math.random() * 20 * chaosLevel/2) - 10 * chaosLevel/2}px)`;
+            break;
+          case 1: // Rotate
+            letters[randomIndex].transform = `rotate(${(Math.random() * 60 * chaosLevel/2) - 30 * chaosLevel/2}deg)`;
+            break;
+          case 2: // Scale
+            letters[randomIndex].transform = `scale(${1 + (Math.random() * chaosLevel * 0.3)})`;
+            break;
+          case 3: // Flicker
+            letters[randomIndex].opacity = Math.random() * 0.5 + 0.5;
+            break;
+          case 4: // Vibrate
+            letters[randomIndex].animation = `vibrate ${0.3 - (chaosLevel * 0.05)}s linear infinite`;
+            break;
+          case 5: // Color shift (new effect)
+            const letterElement = document.getElementById(`letter-${randomIndex}`);
+            if (letterElement && letters[randomIndex].status === 'pending') {
+              letterElement.style.color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`;
+            }
+            break;
+          case 6: // Blur effect (new effect)
+            const blurLetter = document.getElementById(`letter-${randomIndex}`);
+            if (blurLetter) {
+              blurLetter.style.filter = `blur(${Math.random() * 3}px)`;
+            }
+            break;
+          case 7: // Letter swap (actually swap the letter display)
+            if (letters.length > 1) {
+              const swapIdx = Math.floor(Math.random() * letters.length);
+              if (swapIdx !== randomIndex) {
+                const letterElement1 = document.getElementById(`letter-${randomIndex}`);
+                const letterElement2 = document.getElementById(`letter-${swapIdx}`);
+                if (letterElement1 && letterElement2 && 
+                    letters[randomIndex].status === 'pending' && 
+                    letters[swapIdx].status === 'pending') {
+                  const tempChar = letterElement1.textContent;
+                  letterElement1.textContent = letterElement2.textContent;
+                  letterElement2.textContent = tempChar;
+                  // Reset after 1 second
+                  setTimeout(() => {
+                    if (gameState === 'playing') {
+                      renderSentence();
+                    }
+                  }, 1000);
+                }
+              }
+            }
+            break;
+        }
+      }
+      
+      // Occasionally swap two letters (visual only, not affecting the actual text)
+      if (Math.random() > 0.7 && letters.length > 1) {
+        const idx1 = Math.floor(Math.random() * letters.length);
+        let idx2 = Math.floor(Math.random() * letters.length);
+        while (idx1 === idx2) {
+          idx2 = Math.floor(Math.random() * letters.length);
+        }
+        
+        // Swap DOM positions only
+        const temp = document.getElementById(`letter-${idx1}`);
+        const temp2 = document.getElementById(`letter-${idx2}`);
+        
+        if (temp && temp2) {
+          const tempParent = temp.parentNode;
+          const tempSibling = temp.nextSibling === temp2 ? temp : temp.nextSibling;
+          
+          temp2.parentNode.insertBefore(temp, temp2);
+          tempParent.insertBefore(temp2, tempSibling);
+        }
+      }
+
+      // Global effects based on chaos level
+      if (chaosLevel >= 3) {
+        // Occasionally shake the entire sentence display
+        if (Math.random() > 0.8) {
+          sentenceDisplay.style.animation = 'vibrate 0.3s linear';
+          setTimeout(() => { sentenceDisplay.style.animation = ''; }, 300);
+        }
+        
+        // Random screen flashes
+        if (Math.random() > 0.9) {
+          const flash = document.createElement('div');
+          flash.style.position = 'fixed';
+          flash.style.top = '0';
+          flash.style.left = '0';
+          flash.style.width = '100%';
+          flash.style.height = '100%';
+          flash.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+          flash.style.zIndex = '9999';
+          flash.style.pointerEvents = 'none';
+          document.body.appendChild(flash);
+          setTimeout(() => document.body.removeChild(flash), 100);
+        }
+      }
+
+      if (chaosLevel >= 4) {
+        // Occasionally reverse the displayed text direction
+        if (Math.random() > 0.9) {
+          sentenceDisplay.style.flexDirection = Math.random() > 0.5 ? 'row-reverse' : 'row';
+          setTimeout(() => { 
+            if (gameState === 'playing') {
+              sentenceDisplay.style.flexDirection = 'row';
+            }
+          }, 2000);
+        }
+        
+        // Tilt the whole input
+        if (Math.random() > 0.85) {
+          typingInput.style.transform = `rotate(${(Math.random() * 6) - 3}deg)`;
+          setTimeout(() => { typingInput.style.transform = ''; }, 2000);
+        }
+      }
+
+      if (chaosLevel === 5) {
+        // Invert colors
+        if (Math.random() > 0.93) {
+          document.body.style.filter = 'invert(100%)';
+          setTimeout(() => { document.body.style.filter = ''; }, 1000);
+        }
+        
+        // Temporary hide random letters
+        if (Math.random() > 0.85) {
+          for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
+            const rIdx = Math.floor(Math.random() * letters.length);
+            const rLetter = document.getElementById(`letter-${rIdx}`);
+            if (rLetter && letters[rIdx].status === 'pending') {
+              rLetter.style.visibility = 'hidden';
+              setTimeout(() => {
+                if (gameState === 'playing') {
+                  rLetter.style.visibility = 'visible';
+                }
+              }, 800);
+            }
+          }
+        }
+      }
+
+      // Level 6: Matrix-style effects
+      if (chaosLevel === 6) {
+        // Random matrix-style character replacements
+        if (Math.random() > 0.85) {
+          const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+          for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
+            const rIdx = Math.floor(Math.random() * letters.length);
+            const rLetter = document.getElementById(`letter-${rIdx}`);
+            if (rLetter && letters[rIdx].status === 'pending') {
+              const originalChar = rLetter.textContent;
+              rLetter.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+              setTimeout(() => {
+                if (gameState === 'playing') {
+                  rLetter.textContent = originalChar;
+                }
+              }, 500);
+            }
+          }
+        }
+        
+        // Random green text flashes
+        if (Math.random() > 0.9) {
+          const flash = document.createElement('div');
+          flash.style.position = 'fixed';
+          flash.style.top = '0';
+          flash.style.left = '0';
+          flash.style.width = '100%';
+          flash.style.height = '100%';
+          flash.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
+          flash.style.zIndex = '9999';
+          flash.style.pointerEvents = 'none';
+          document.body.appendChild(flash);
+          setTimeout(() => document.body.removeChild(flash), 100);
+        }
+      }
+
+      // Level 7: Earthquake mode
+      if (chaosLevel === 7) {
+        // Shake the entire page
+        if (Math.random() > 0.8) {
+          document.body.style.animation = 'vibrate 0.2s linear';
+          setTimeout(() => { document.body.style.animation = ''; }, 200);
+        }
+        
+        // Random letter explosions
+        if (Math.random() > 0.85) {
+          const rIdx = Math.floor(Math.random() * letters.length);
+          const rLetter = document.getElementById(`letter-${rIdx}`);
+          if (rLetter && letters[rIdx].status === 'pending') {
+            rLetter.style.transform = `scale(2) translate(${(Math.random() * 20) - 10}px, ${(Math.random() * 20) - 10}px)`;
+            setTimeout(() => {
+              if (gameState === 'playing') {
+                rLetter.style.transform = '';
+              }
+            }, 300);
+          }
+        }
+      }
+
+      // Level 8: Mirror dimension
+      if (chaosLevel === 8) {
+        // Mirror the entire display
+        if (Math.random() > 0.85) {
+          sentenceDisplay.style.transform = 'scaleX(-1)';
+          setTimeout(() => { 
+            if (gameState === 'playing') {
+              sentenceDisplay.style.transform = '';
+            }
+          }, 1500);
+        }
+        
+        // Random letter mirroring
+        if (Math.random() > 0.9) {
+          for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
+            const rIdx = Math.floor(Math.random() * letters.length);
+            const rLetter = document.getElementById(`letter-${rIdx}`);
+            if (rLetter && letters[rIdx].status === 'pending') {
+              rLetter.style.transform = 'scaleX(-1)';
+              setTimeout(() => {
+                if (gameState === 'playing') {
+                  rLetter.style.transform = '';
+                }
+              }, 1000);
+            }
+          }
+        }
+      }
+
+      // Level 9: Time distortion
+      if (chaosLevel === 9) {
+        // Random time dilation (slow down chaos effects)
+        if (Math.random() > 0.9) {
+          const originalInterval = chaosInterval;
+          clearInterval(chaosInterval);
+          chaosInterval = setInterval(() => {
+            applyChaos();
+            renderSentence();
+          }, 2000);
+          setTimeout(() => {
+            if (gameState === 'playing') {
+              clearInterval(chaosInterval);
+              chaosInterval = originalInterval;
+            }
+          }, 3000);
+        }
+        
+        // Random letter time warping
+        if (Math.random() > 0.85) {
+          for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
+            const rIdx = Math.floor(Math.random() * letters.length);
+            const rLetter = document.getElementById(`letter-${rIdx}`);
+            if (rLetter && letters[rIdx].status === 'pending') {
+              rLetter.style.transition = 'all 3s linear';
+              rLetter.style.transform = `translate(${(Math.random() * 40) - 20}px, ${(Math.random() * 40) - 20}px) rotate(${(Math.random() * 360)}deg)`;
+              setTimeout(() => {
+                if (gameState === 'playing') {
+                  rLetter.style.transition = 'all 0.2s ease';
+                  rLetter.style.transform = '';
+                }
+              }, 3000);
+            }
+          }
+        }
+      }
+
+      // Level 10: Ultimate chaos
+      if (chaosLevel === 10) {
+        // Combine multiple extreme effects
+        if (Math.random() > 0.8) {
+          // Invert colors
+          document.body.style.filter = 'invert(100%)';
+          
+          // Shake everything
+          document.body.style.animation = 'vibrate 0.2s linear';
+          
+          // Flash screen
+          const flash = document.createElement('div');
+          flash.style.position = 'fixed';
+          flash.style.top = '0';
+          flash.style.left = '0';
+          flash.style.width = '100%';
+          flash.style.height = '100%';
+          flash.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+          flash.style.zIndex = '9999';
+          flash.style.pointerEvents = 'none';
+          document.body.appendChild(flash);
+          
+          // Reset after chaos
+          setTimeout(() => {
+            if (gameState === 'playing') {
+              document.body.style.filter = '';
+              document.body.style.animation = '';
+              document.body.removeChild(flash);
+            }
+          }, 500);
+        }
+        
+        // Random letter teleportation
+        if (Math.random() > 0.85) {
+          for (let i = 0; i < Math.floor(Math.random() * 5) + 1; i++) {
+            const rIdx = Math.floor(Math.random() * letters.length);
+            const rLetter = document.getElementById(`letter-${rIdx}`);
+            if (rLetter && letters[rIdx].status === 'pending') {
+              const randomX = (Math.random() * window.innerWidth) - (window.innerWidth / 2);
+              const randomY = (Math.random() * window.innerHeight) - (window.innerHeight / 2);
+              rLetter.style.position = 'absolute';
+              rLetter.style.left = `${randomX}px`;
+              rLetter.style.top = `${randomY}px`;
+              setTimeout(() => {
+                if (gameState === 'playing') {
+                  rLetter.style.position = '';
+                  rLetter.style.left = '';
+                  rLetter.style.top = '';
+                }
+              }, 1000);
+            }
+          }
+        }
+        
+        // Random input field transformations
+        if (Math.random() > 0.9) {
+          typingInput.style.transform = `scale(${1 + Math.random()}) rotate(${(Math.random() * 360)}deg)`;
+          typingInput.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+          setTimeout(() => {
+            if (gameState === 'playing') {
+              typingInput.style.transform = '';
+              typingInput.style.filter = '';
+            }
+          }, 1000);
+        }
+      }
+    }
+
+    // Finish game and show results
+    function finishGame() {
+      // Stop chaos
+      clearInterval(chaosInterval);
+      
+      // Reset letter transformations
+      letters.forEach(letter => {
+        letter.transform = '';
+        letter.animation = '';
+        letter.opacity = 1;
+      });
+      renderSentence();
+      
+      // Show victory message
+      const timeTaken = ((endTime - startTime) / 1000).toFixed(1);
+      messageElement.style.display = 'block';
+      messageElement.textContent = `YOU SURVIVED THE CHAOS IN ${timeTaken} SECONDS!`;
+      
+      // Show controls
+      controls.innerHTML = `
+        <button id="try-again">Try Again</button>
+        <button id="increase-chaos" class="increase-chaos">Increase Chaos!</button>
+      `;
+      
+      document.getElementById('try-again').addEventListener('click', () => {
+        chaosLevel = 1;
+        startGame();
+      });
+      
+      document.getElementById('increase-chaos').addEventListener('click', () => {
+        chaosLevel = Math.min(chaosLevel + 1, 10);
+        startGame();
+      });
+      
+      // Disable input
+      typingInput.disabled = true;
+      
+      // Celebrate with confetti!
+      launchConfetti();
+    }
+
+    // Launch confetti celebration
+    function launchConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+      
+      // Create particles
+      const particles = [];
+      const particleCount = 100;
+      
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: confettiCanvas.height + 10,
+          size: Math.random() * 5 + 5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: -Math.random() * 3 - 3,
+          speedX: Math.random() * 6 - 3,
+          rotation: Math.random() * 360,
+          rotationSpeed: Math.random() * 10 - 5
+        });
+      }
+      
+      // Animate confetti
+      function animateConfetti() {
+        confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        
+        let stillAlive = false;
+        particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.speedY += 0.1;
+          p.rotation += p.rotationSpeed;
+          
+          if (p.y < confettiCanvas.height) {
+            stillAlive = true;
+            
+            confettiContext.save();
+            confettiContext.translate(p.x, p.y);
+            confettiContext.rotate(p.rotation * Math.PI / 180);
+            confettiContext.fillStyle = p.color;
+            confettiContext.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            confettiContext.restore();
+          }
+        });
+        
+        if (stillAlive) {
+          requestAnimationFrame(animateConfetti);
+        }
+      }
+      
+      animateConfetti();
+    }
+
+    // Handle window resize for confetti canvas
+    window.addEventListener('resize', () => {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    });
+
+    // Initialize the game when page loads
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
